@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 个人博客</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">📝 我的博客</a>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="admin.html" class="active">管理</a>
+                <a href="javascript:void(0)" onclick="handleAuthClick()" id="authLink" style="display:none">登录</a>
+                <span id="userDisplay"></span>
+                <a href="javascript:void(0)" onclick="logout()" id="logoutLink">退出</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="admin-header">
+            <h1>文章管理</h1>
+            <button class="btn-primary" id="newArticleBtn">+ 写新文章</button>
+        </div>
+
+        <div id="adminArticleList">
+            <div class="loading">加载中...</div>
+        </div>
+    </main>
+
+    <!-- 文章编辑模态框 -->
+    <div class="modal-overlay" id="editorModal" style="display:none">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="editorTitle">写文章</h2>
+                <button class="modal-close" onclick="closeEditor()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="articleForm" onsubmit="saveArticle(event)">
+                    <input type="hidden" id="articleId">
+                    <div class="form-group">
+                        <label for="articleTitle">标题</label>
+                        <input type="text" id="articleTitle" required maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label for="articleCategory">分类</label>
+                        <select id="articleCategory"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleTags">标签</label>
+                        <div id="tagCheckboxes" class="tag-checkboxes"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleSummary">摘要（可选）</label>
+                        <textarea id="articleSummary" rows="2" maxlength="500"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleContent">正文</label>
+                        <textarea id="articleContent" rows="15" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleStatus">状态</label>
+                        <select id="articleStatus">
+                            <option value="DRAFT">草稿</option>
+                            <option value="PUBLISHED">发布</option>
+                        </select>
+                    </div>
+                    <div id="editorError" class="error-msg" style="display:none"></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeEditor()">取消</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

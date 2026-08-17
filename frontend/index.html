@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人博客</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">📝 我的博客</a>
+            <div class="nav-links">
+                <a href="index.html" class="active">首页</a>
+                <a href="javascript:void(0)" onclick="goToAdmin()" id="adminLink">管理</a>
+                <a href="javascript:void(0)" onclick="handleAuthClick()" id="authLink">登录</a>
+                <span id="userDisplay" style="display:none"></span>
+                <a href="javascript:void(0)" onclick="logout()" id="logoutLink" style="display:none">退出</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="hero">
+            <h1>我的个人博客</h1>
+            <p>记录学习、分享思考的小角落</p>
+        </div>
+
+        <div class="content-layout">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>文章分类</h3>
+                    <ul id="categoryList" class="category-list">
+                        <li><a href="javascript:void(0)" id="allCategoriesLink" class="active">全部</a></li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <h3>标签</h3>
+                    <div id="tagList" class="tag-cloud"></div>
+                </div>
+            </aside>
+
+            <section class="article-list" id="articleList">
+                <div class="loading">加载中...</div>
+            </section>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

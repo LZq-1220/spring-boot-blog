@@ -1,0 +1,76 @@
+spring:
+  profiles:
+    active: h2
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+app:
+  jwt:
+    # Base64 编码的 512 位密钥。生产环境务必用环境变量覆盖，不要用仓库里这个默认值：
+    #   JWT_SECRET=$(head -c 64 /dev/urandom | base64 -w0)
+    secret: ${JWT_SECRET:TF7nqXtcu4WDXvZfahkARYdhxzCsIdACYlMCDUTImDHZYdSdXOulLOfNMYK8RWDM3AuKM43wAnDekTtuke7tiA==}
+    expiration-ms: 86400000
+
+---
+spring:
+  config:
+    activate:
+      on-profile: h2
+  datasource:
+    # 文件模式：数据写入磁盘文件 ./data/blog.mv.db，重启后端不丢。
+    # 开发期用它替代内存库，可随时换回 jdbc:h2:mem:blog;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:file:./data/blog
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+---
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    url: jdbc:mysql://localhost:3306/blog?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+---
+# Railway 云部署环境（使用 Railway 提供的 MySQL）
+spring:
+  config:
+    activate:
+      on-profile: railway
+  datasource:
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/blog?useSSL=false&serverTimezone=UTC&characterEncoding=utf-8}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQLUSER:root}
+    password: ${MYSQLPASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: false
+  h2:
+    console:
+      enabled: false
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: always
+    include-stacktrace: never
+
+logging:
+  level:
+    root: INFO
+    com.blog: INFO
