@@ -4,5 +4,5 @@ nixPkgs = ["maven", "openjdk17"]
 [phases.build]
 cmds = ["mvn clean package -DskipTests"]
 
-[start]
+[phases.start]
 cmd = "java -Xmx400m -Xms200m -Dserver.port=$PORT -Dspring.profiles.active=railway -jar target/personal-blog-1.0.0.jar"
