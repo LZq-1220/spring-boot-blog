@@ -1,189 +1,123 @@
-# Railway 部署指南
+# 部署指南（Railway）
+
+本文件是唯一的部署文档，整合了部署步骤、Railway 常见坑、验证方法和故障排查。
 
 ## 前置准备
 
-1. **注册账号**
-   - 访问 [Railway.app](https://railway.app)
-   - 使用 GitHub 账号登录（推荐）
-
-2. **准备 GitHub 仓库**
-   - 注册 [GitHub](https://github.com) 账号（如果还没有）
-   - 创建一个新的仓库（可以是私有或公开）
+1. 注册 [Railway](https://railway.app)（用 GitHub 账号登录即可）。
+2. 准备好一个 GitHub 仓库（私有即可，部署无需公开）。
 
 ## 部署步骤
 
-### 第一步：将项目推送到 GitHub
-
-在项目根目录执行：
+### 1. 推送代码到 GitHub
 
 ```bash
-# 初始化 Git 仓库
 git init
-
-# 添加所有文件
 git add .
-
-# 提交
-git commit -m "Initial commit for Railway deployment"
-
-# 关联远程仓库（替换 YOUR_USERNAME 和 YOUR_REPO）
+git commit -m "Ready for deployment"
 git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-
-# 推送到 GitHub
 git branch -M main
 git push -u origin main
 ```
 
-### 第二步：在 Railway 创建项目
+### 2. 在 Railway 创建项目
 
-1. 登录 [Railway Dashboard](https://railway.app/dashboard)
-2. 点击 **"New Project"**
-3. 选择 **"Deploy from GitHub repo"**
-4. 授权 Railway 访问你的 GitHub
-5. 选择刚才推送的仓库
+1. 登录 Railway Dashboard → **New Project** → **Deploy from GitHub repo**。
+2. 授权 Railway 访问 GitHub，选择上面的仓库。
 
-### 第三步：添加 MySQL 数据库
+### 3. 添加 MySQL 数据库
 
-1. 在项目页面点击 **"+ New"**
-2. 选择 **"Database"** → **"Add MySQL"**
-3. Railway 会自动创建一个 MySQL 实例并注入环境变量
+点击 **+ New** → **Database** → **Add MySQL**。Railway 会自动创建实例并注入环境变量。
 
-### 第四步：配置环境变量
+### 4. 配置环境变量（关键）
 
-在项目的 **Variables** 标签页添加：
+在项目的 **Variables** 标签添加：
 
 ```
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-min-512-bits
+SPRING_PROFILES_ACTIVE=railway
+JWT_SECRET=<生成的64位密钥>
 ```
 
-**生成安全的 JWT_SECRET（推荐）：**
-- 访问 [随机字符串生成器](https://www.random.org/strings/?num=1&len=64&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain)
-- 或者在本地执行：`openssl rand -base64 64`
+> ⚠️ **Railway MySQL 变量命名坑**：插件注入的变量名**不带下划线**（`MYSQLHOST`/`MYSQLPORT`/`MYSQLDATABASE`/`MYSQLUSER`/`MYSQLPASSWORD`），而本项目 `application.yml` 用的是带下划线的 `MYSQL_HOST` 等。需要手动添加 5 个引用变量：
 
-### 第五步：部署
+```
+MYSQL_HOST     = ${{MySQL.MYSQLHOST}}
+MYSQL_PORT     = ${{MySQL.MYSQLPORT}}
+MYSQL_DATABASE = ${{MySQL.MYSQLDATABASE}}
+MYSQL_USER     = ${{MySQL.MYSQLUSER}}
+MYSQL_PASSWORD = ${{MySQL.MYSQLPASSWORD}}
+```
 
-1. Railway 会自动检测到配置文件并开始部署
-2. 等待构建完成（约 3-5 分钟）
-3. 部署成功后，点击 **"Settings"** → **"Generate Domain"** 获取访问地址
-
-### 第六步：验证部署
-
-访问生成的域名（例如：`https://your-app.railway.app`），测试接口：
+生成 JWT_SECRET：
 
 ```bash
-# 测试健康检查
-curl https://your-app.railway.app/api/metadata/categories
+# Linux / macOS / Git Bash
+openssl rand -base64 64
 
-# 注册测试账号
-curl -X POST https://your-app.railway.app/api/auth/register \
+# Windows PowerShell
+[Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(64))
+```
+
+### 5. 部署与域名
+
+1. Railway 检测到仓库后自动构建（约 3–5 分钟）。
+2. **Settings** → **Generate Domain** 获取访问地址。
+3. 前端已打进 jar（`src/main/resources/static/`），同域访问，无需额外配置 CORS 或前端地址。
+
+## 验证部署
+
+```bash
+API="https://你的域名.up.railway.app"
+
+# 基础接口
+curl "$API/api/categories"
+
+# 注册
+curl -X POST "$API/api/auth/register" \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
+  -d '{"username":"test","email":"test@example.com","password":"Test123456"}'
+
+# 登录
+curl -X POST "$API/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password":"Test123456"}'
 ```
 
-## 前端配置
+成功标志：日志里出现 `Started BlogApplication`，服务状态绿色 Online。
 
-修改 `frontend/js/api.js` 中的 API 地址：
+## Railway 关键点（踩过的坑）
 
-```javascript
-// 本地开发
-// const API_BASE_URL = 'http://localhost:8080';
-
-// Railway 生产环境
-const API_BASE_URL = 'https://your-app.railway.app';
-```
+1. **用 Dockerfile，不要用 railway.json 的 startCommand 执行 shell 命令**——它不会展开 `$(ls ...)` 之类的 shell 语法。
+2. **Railway 只负责注入环境变量**，不会替换配置文件内容；`${...}` 占位符由 Spring Boot 自己解析。
+3. **变量名必须带下划线**，与 Spring Boot 宽松绑定规则一致（见上文变量配置）。
+4. **前端必须放在 `src/main/resources/static/`** 才能被打进 jar；Spring Security 已放开 `/*.html`、`/css/**`、`/js/**` 的访问。
+5. Dockerfile 使用 `COPY --from=build /app/target/*.jar app.jar` 通配符匹配，避免文件名硬编码。
 
 ## 常见问题
 
-### 1. 构建失败
+| 问题 | 可能原因 | 解决方法 |
+|------|---------|---------|
+| 构建失败 | Maven 依赖下载失败 / 网络波动 | 点击 **Redeploy** 重试 |
+| 启动崩溃 / 502 | JWT_SECRET 未设置或数据库未就绪 | 检查环境变量、MySQL 服务状态 |
+| 数据库连接失败 | 变量名没带下划线 | 按上文手动添加 `MYSQL_HOST` 等引用变量 |
+| 页面/接口 404 | 应用未启动成功 | 查看 **Logs**，确认 `Started BlogApplication` |
+| OOM | 内存不足 | 已配置 `-Xmx400m`，必要时调大 |
 
-**检查 Railway 日志：**
-- 点击 **Deployments** 查看构建日志
-- 常见原因：Maven 依赖下载失败、内存不足
+## 日常运维
 
-**解决方案：**
-- 重新部署（点击 **Redeploy**）
-- 检查 `pom.xml` 配置是否正确
+- **自动部署**：推送到 `main` 分支后 Railway 自动构建部署。
+- **回滚**：Deployments → 上一个成功部署 → **⋮** → **Redeploy**。
+- **重启**：Settings → **Restart**。
+- **看日志**：Deployments → **View Logs**，或 `railway logs`（需 `npm i -g @railway/cli`）。
+- **省钱**：开启 Sleep Mode（无流量自动休眠），关注 Dashboard → Usage。
 
-### 2. 数据库连接失败
+## 生产环境建议
 
-**检查环境变量：**
-- 确认 MySQL 服务已添加并运行
-- Railway 会自动注入这些变量：
-  - `DATABASE_URL`
-  - `MYSQLUSER`
-  - `MYSQLPASSWORD`
-  - `MYSQLHOST`
-  - `MYSQLPORT`
-  - `MYSQLDATABASE`
+- 使用强 JWT_SECRET（64+ 字符），不要用仓库里的开发默认值。
+- 生产 profile（railway）已关闭 H2 Console 和 SQL 日志、隐藏堆栈信息。
+- 定期备份数据库。
 
-### 3. 应用启动失败
-
-**查看运行日志：**
-- 点击 **View Logs**
-- 查找错误信息
-
-**常见原因：**
-- 端口配置错误（已自动配置 `$PORT`）
-- JWT_SECRET 未设置
-- 数据库未就绪
-
-### 4. 访问 404
-
-**确认：**
-- 应用已成功启动（日志中看到 "Started BlogApplication"）
-- 域名已生成并绑定
-- 使用正确的 API 路径（`/api/...`）
-
-## 免费额度说明
-
-Railway 免费计划：
-- **$5** 免费额度/月
-- **500 小时** 运行时间
-- **100GB** 出站流量
-- **1GB** 内存
-
-**省钱技巧：**
-- 使用睡眠模式（无活动时自动休眠）
-- 监控使用量：Dashboard → Usage
-
-## 下一步优化
-
-部署成功后可以考虑：
-
-1. **绑定自定义域名**
-   - Railway 支持绑定自己的域名
-   - Settings → Custom Domain
-
-2. **设置环境隔离**
-   - 创建 `dev` 和 `prod` 分支
-   - 分别部署到不同环境
-
-3. **添加监控**
-   - Railway 自带基础监控
-   - 可接入 Sentry 等第三方服务
-
-4. **配置 CI/CD**
-   - 推送代码自动部署
-   - 添加自动测试
-
-5. **迁移到服务器**
-   - 当访问量增大时
-   - 考虑迁移到云服务器获得更好性能
-
-## 故障排查流程
-
-1. **查看 Deployment 状态**：是否构建成功？
-2. **查看 Runtime 日志**：应用是否正常启动？
-3. **测试数据库连接**：MySQL 服务是否正常？
-4. **检查环境变量**：JWT_SECRET 等是否正确配置？
-5. **验证网络**：域名是否可访问？
-
-## 需要帮助？
+## 参考
 
 - Railway 文档：https://docs.railway.app
-- 本项目问题：查看 GitHub Issues
-- 联系项目维护者
-
----
-
-**祝部署顺利！🚀**
+- Railway 状态：https://status.railway.app

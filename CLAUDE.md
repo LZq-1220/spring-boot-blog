@@ -196,8 +196,7 @@ src/main/java/com/blog/
 ├── security/        # 安全相关（JwtUtil, JwtAuthFilter, AuthPrincipal）
 └── service/         # 业务逻辑层
 
-frontend/            # 前端静态文件（HTML/CSS/JS）
-data/               # 数据文件（如有）
+src/main/resources/static/  # 前端静态文件（HTML/CSS/JS，随 jar 打包）
 ```
 
 ## 常见任务参考

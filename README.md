@@ -41,7 +41,7 @@
    ```
 
 3. **访问应用**
-   - 前端：打开 `frontend/index.html`
+   - 前端：http://localhost:8080/（Spring Boot 直接提供 `static/` 下的页面）
    - 后端 API：http://localhost:8080/api
    - H2 控制台：http://localhost:8080/h2-console
 
@@ -91,14 +91,8 @@ blog/
 │   ├── security/        # 安全配置
 │   └── service/         # 业务逻辑层
 ├── src/main/resources/
-│   └── application.yml  # 应用配置
-├── frontend/            # 前端文件
-│   ├── index.html      # 首页
-│   ├── post.html       # 文章详情
-│   ├── admin.html      # 管理后台
-│   ├── login.html      # 登录注册
-│   ├── css/            # 样式文件
-│   └── js/             # JavaScript
+│   ├── application.yml  # 应用配置
+│   └── static/          # 前端文件（index/post/admin/login.html + css/js）
 ├── CLAUDE.md           # AI 助手工作规范
 ├── DEPLOYMENT.md       # 部署指南
 └── pom.xml            # Maven 配置
@@ -133,16 +127,7 @@ blog/
 ## 开发指南
 
 详细的开发指南和架构说明请查看：
-- [项目学习指南.md](./项目学习指南.md) - 完整的技术解析
 - [CLAUDE.md](./CLAUDE.md) - 代码规范和工作流程
-
-## 默认账号
-
-首次启动会自动创建管理员账号：
-- 用户名：`admin`
-- 密码：`admin123`
-
-**⚠️ 生产环境请立即修改默认密码！**
 
 ## 环境变量
 

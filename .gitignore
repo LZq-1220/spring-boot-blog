@@ -25,3 +25,9 @@ logs/
 
 # Sensitive
 application-local.yml
+
+# Privacy / Personal (never commit)
+.claude/
+简历*
+resume*
+*.docx
