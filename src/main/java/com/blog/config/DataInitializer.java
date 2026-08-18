@@ -37,7 +37,13 @@ public class DataInitializer {
                 log.info("已写入默认分类");
             }
             if (tagRepository.count() == 0) {
-                List.of("Java", "Spring", "前端", "数据库", "杂谈").forEach(name ->
+                List.of(
+                        "Java", "Spring", "Spring Boot", "前端", "数据库", "杂谈",
+                        "Python", "Go", "JavaScript", "TypeScript", "C++",
+                        "MySQL", "Redis", "Docker", "Kubernetes", "Linux",
+                        "算法", "数据结构", "网络", "操作系统", "分布式系统",
+                        "微服务", "设计模式", "面试", "开源"
+                ).forEach(name ->
                         tagRepository.save(Tag.builder().name(name).build()));
                 log.info("已写入默认标签");
             }
