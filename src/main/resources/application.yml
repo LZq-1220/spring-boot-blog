@@ -51,8 +51,10 @@ spring:
     activate:
       on-profile: railway
   datasource:
-    url: ${DATABASE_URL}
+    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
     driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQLUSER}
+    password: ${MYSQLPASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
