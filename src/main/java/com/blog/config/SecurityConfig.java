@@ -30,9 +30,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    /** 允许的前端来源，逗号分隔。默认只放开本地静态服务常用端口。 */
-    @Value("${app.cors.allowed-origins:http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000,http://127.0.0.1:3000}")
-    private String allowedOrigins;
+    /** 允许的前端来源模式，逗号分隔。支持通配符，覆盖本地开发和 Railway 部署域名。 */
+    @Value("${app.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*,https://*.up.railway.app,https://*.railway.app}")
+    private String allowedOriginPatterns;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -82,10 +82,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // 原先是 allowedOriginPatterns("*") + allowCredentials(true)。
-        // 认证走 Authorization 头里的 Bearer token，不需要 credentials，
-        // 因此收紧成具体来源白名单并关掉 credentials。
-        config.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList());
+        // 使用 allowedOriginPatterns 支持通配符（如 https://*.railway.app），
+        // 覆盖本地开发和 Railway 部署域名（域名可能随重建变化）。
+        // 认证走 Authorization 头里的 Bearer token，不需要 credentials。
+        config.setAllowedOriginPatterns(Arrays.stream(allowedOriginPatterns.split(",")).map(String::trim).toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(false);
