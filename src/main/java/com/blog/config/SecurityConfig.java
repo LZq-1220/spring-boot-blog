@@ -54,6 +54,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                // 放开静态资源（HTML/CSS/JS）
+                .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/favicon.ico").permitAll()
                 // 必须排在下面的 GET /api/articles/** 之前：
                 // 匹配器按声明顺序生效，否则「我的文章」会被 permitAll 命中，
                 // 导致 auth 为 null、controller 里 auth.getName() 抛 NPE。
