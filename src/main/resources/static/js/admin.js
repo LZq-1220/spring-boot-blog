@@ -65,14 +65,21 @@ async function loadTags() {
         const tags = await api.getTags();
         const container = document.getElementById('tagCheckboxes');
         container.innerHTML = '';
+        if (tags.length === 0) {
+            container.innerHTML = '<span class="tag-empty-hint">暂无标签</span>';
+            return;
+        }
         tags.forEach(t => {
             const label = document.createElement('label');
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.value = t.id;
-            label.appendChild(cb);
+            cb.id = 'tag-' + t.id;
+            const span = document.createElement('span');
             // textContent 而非 innerHTML：标签名不再有注入风险
-            label.appendChild(document.createTextNode(' ' + t.name));
+            span.textContent = t.name;
+            label.appendChild(cb);
+            label.appendChild(span);
             container.appendChild(label);
         });
     } catch (e) {
@@ -88,7 +95,7 @@ function newArticle() {
     document.querySelectorAll('#tagCheckboxes input[type=checkbox]').forEach(cb => cb.checked = false);
     document.getElementById('articleSummary').value = '';
     document.getElementById('articleContent').value = '';
-    document.getElementById('articleStatus').value = 'DRAFT';
+    document.getElementById('statusDraft').checked = true;
     document.getElementById('editorError').style.display = 'none';
     document.getElementById('editorModal').style.display = 'flex';
 }
@@ -108,7 +115,12 @@ async function editArticle(id) {
         });
         document.getElementById('articleSummary').value = article.summary || '';
         document.getElementById('articleContent').value = article.content || '';
-        document.getElementById('articleStatus').value = article.status;
+        // 使用 radio 按钮而非 select
+        if (article.status === 'PUBLISHED') {
+            document.getElementById('statusPublished').checked = true;
+        } else {
+            document.getElementById('statusDraft').checked = true;
+        }
         document.getElementById('editorError').style.display = 'none';
         document.getElementById('editorModal').style.display = 'flex';
     } catch (e) {
@@ -133,7 +145,7 @@ async function saveArticle(e) {
         title: document.getElementById('articleTitle').value.trim(),
         summary: document.getElementById('articleSummary').value.trim() || null,
         content: document.getElementById('articleContent').value.trim(),
-        status: document.getElementById('articleStatus').value,
+        status: document.querySelector('input[name="articleStatus"]:checked').value,
         categoryId: document.getElementById('articleCategory').value
             ? parseInt(document.getElementById('articleCategory').value)
             : null,

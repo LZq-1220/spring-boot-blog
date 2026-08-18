@@ -35,46 +35,50 @@
     <div class="modal-overlay" id="editorModal" style="display:none">
         <div class="modal">
             <div class="modal-header">
-                <h2 id="editorTitle">写文章</h2>
-                <button class="modal-close" onclick="closeEditor()">&times;</button>
+                <h2 id="editorTitle"><span class="modal-header-icon">✍️</span>写文章</h2>
+                <button class="modal-close" onclick="closeEditor()" aria-label="关闭">&times;</button>
             </div>
-            <div class="modal-body">
-                <form id="articleForm" onsubmit="saveArticle(event)">
+            <form id="articleForm" onsubmit="saveArticle(event)">
+                <div class="modal-body">
                     <input type="hidden" id="articleId">
-                    <div class="form-group">
-                        <label for="articleTitle">标题</label>
-                        <input type="text" id="articleTitle" required maxlength="200">
-                    </div>
-                    <div class="form-group">
-                        <label for="articleCategory">分类</label>
-                        <select id="articleCategory"></select>
+                    <div class="form-row">
+                        <div class="form-group form-group-grow">
+                            <label for="articleTitle">标题</label>
+                            <input type="text" id="articleTitle" placeholder="给文章起一个好标题" required maxlength="200">
+                        </div>
+                        <div class="form-group form-group-narrow">
+                            <label for="articleCategory">分类</label>
+                            <select id="articleCategory"></select>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="articleTags">标签</label>
                         <div id="tagCheckboxes" class="tag-checkboxes"></div>
                     </div>
                     <div class="form-group">
-                        <label for="articleSummary">摘要（可选）</label>
-                        <textarea id="articleSummary" rows="2" maxlength="500"></textarea>
+                        <label for="articleSummary">摘要 <span class="label-optional">可选</span></label>
+                        <textarea id="articleSummary" rows="2" maxlength="500" placeholder="一两句话概括文章内容"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="articleContent">正文</label>
-                        <textarea id="articleContent" rows="15" required></textarea>
+                        <textarea id="articleContent" class="content-editor" rows="15" required placeholder="开始写点什么吧..."></textarea>
                     </div>
                     <div class="form-group">
                         <label for="articleStatus">状态</label>
-                        <select id="articleStatus">
-                            <option value="DRAFT">草稿</option>
-                            <option value="PUBLISHED">发布</option>
-                        </select>
+                        <div class="status-toggle">
+                            <input type="radio" name="articleStatus" id="statusDraft" value="DRAFT" checked>
+                            <label for="statusDraft">草稿</label>
+                            <input type="radio" name="articleStatus" id="statusPublished" value="PUBLISHED">
+                            <label for="statusPublished">发布</label>
+                        </div>
                     </div>
                     <div id="editorError" class="error-msg" style="display:none"></div>
-                    <div class="form-actions">
-                        <button type="button" class="btn-cancel" onclick="closeEditor()">取消</button>
-                        <button type="submit" class="btn-primary">保存</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditor()">取消</button>
+                    <button type="submit" class="btn-primary">保存文章</button>
+                </div>
+            </form>
         </div>
     </div>
 

@@ -645,91 +645,223 @@ button:hover {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(11,14,20,0.85);
-    backdrop-filter: blur(4px);
+    background: linear-gradient(135deg, rgba(11,14,20,0.92) 0%, rgba(26,31,46,0.88) 100%);
+    backdrop-filter: blur(6px);
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding-top: 60px;
+    padding: 40px 20px;
     z-index: 200;
     overflow-y: auto;
 }
 .modal {
     background: var(--bg-surface);
     border: 1px solid var(--border-visible);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 800px;
-    box-shadow: var(--shadow-elevated);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 720px;
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px -12px rgba(0,0,0,0.55);
+    animation: modalPop 0.22s ease-out;
+}
+@keyframes modalPop {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 28px;
+    padding: 22px 28px;
     border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
 }
 .modal-header h2 {
     font-family: "Sora", sans-serif;
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--accent-warm);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.01em;
+}
+.modal-header-icon {
+    font-size: 1.1rem;
 }
 .modal-close {
     background: none;
     border: none;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+    line-height: 1;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    transition: all 0.2s;
+    border-radius: 8px;
+    transition: all 0.15s;
 }
 .modal-close:hover {
     background: var(--bg-elevated);
     color: var(--text-primary);
 }
 .modal-body {
-    padding: 28px;
+    padding: 24px 28px;
+    overflow-y: auto;
+    flex: 1;
+}
+.modal-footer {
+    flex-shrink: 0;
+    padding: 18px 28px;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.label-optional {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+.form-group-grow {
+    flex: 1;
+    min-width: 0;
+}
+.form-group-narrow {
+    flex: 0 0 160px;
+}
+
+#articleTitle,
+#articleSummary,
+#articleContent,
+#articleCategory {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.92rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+#articleTitle::placeholder,
+#articleSummary::placeholder,
+#articleContent::placeholder {
+    color: var(--text-muted);
+}
+#articleTitle:focus,
+#articleSummary:focus,
+#articleContent:focus,
+#articleCategory:focus {
+    outline: none;
+    border-color: var(--accent-cool);
+    box-shadow: 0 0 0 3px rgba(34,211,238,0.12);
+}
+.content-editor {
+    resize: vertical;
+    line-height: 1.6;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.88rem;
 }
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 24px;
 }
 .form-actions button {
     width: auto;
 }
 
+/* 标签选择：pill 风格，checkbox 隐藏，靠 :checked + span 呈现选中态 */
 .tag-checkboxes {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
+}
+.tag-empty-hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
 }
 .tag-checkboxes label {
-    display: flex;
+    position: relative;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     color: var(--text-secondary);
-    padding: 6px 12px;
+    padding: 6px 14px;
     border: 1px solid var(--border-visible);
-    border-radius: 6px;
-    transition: all 0.2s;
+    border-radius: 20px;
+    background: var(--bg-elevated);
+    transition: all 0.15s;
+    font-family: "JetBrains Mono", monospace;
 }
 .tag-checkboxes label:hover {
     border-color: var(--accent-cool);
     color: var(--accent-cool);
 }
 .tag-checkboxes input[type="checkbox"] {
-    width: auto;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.tag-checkboxes label:has(input:checked) {
+    background: var(--accent-cool);
+    border-color: var(--accent-cool);
+    color: var(--bg-main);
+    font-weight: 600;
+}
+
+/* 状态切换：草稿 / 发布 分段控件 */
+.status-toggle {
+    display: inline-flex;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 3px;
+}
+.status-toggle input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.status-toggle label {
+    padding: 7px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 0;
+}
+.status-toggle input#statusDraft:checked ~ label[for="statusDraft"],
+.status-toggle input#statusPublished:checked ~ label[for="statusPublished"] {
+    background: var(--accent-warm);
+    color: var(--bg-main);
 }
 
 /* ===== Error ===== */
